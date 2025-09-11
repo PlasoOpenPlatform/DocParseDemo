@@ -1,0 +1,390 @@
+/* App.css - 文档解析Demo样式 */
+
+/* 全局样式 */
+.app-layout {
+    min-height: 100vh;
+    background: #f0f2f5;
+}
+
+/* 头部样式 */
+.app-header {
+    background: linear-gradient(90deg, #1890ff 0%, #096dd9 100%);
+    padding: 0 24px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.header-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 64px;
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    color: white;
+}
+
+.logo-icon {
+    font-size: 32px;
+    margin-right: 12px;
+    color: white;
+}
+
+.logo-text {
+    color: white !important;
+    margin: 0;
+    font-weight: 600;
+    font-size: 24px;
+}
+
+/* 内容区域 */
+.app-content {
+    padding: 24px;
+    max-width: 1200px;
+    margin: 0 auto;
+    width: 100%;
+}
+
+.content-container {
+    max-width: 100%;
+}
+
+/* 统计卡片行 */
+.stats-row {
+    margin-bottom: 24px;
+}
+
+.stats-row .ant-card {
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    transition: all 0.3s ease;
+}
+
+.stats-row .ant-card:hover {
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+    transform: translateY(-2px);
+}
+
+/* 卡片样式 */
+.upload-card,
+.file-list-card {
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    margin-bottom: 24px;
+}
+
+.upload-card .ant-card-head,
+.file-list-card .ant-card-head {
+    border-bottom: 1px solid #f0f0f0;
+    background: #fafafa;
+}
+
+.upload-card .ant-card-head-title,
+.file-list-card .ant-card-head-title {
+    font-weight: 600;
+    color: #262626;
+}
+
+/* 文件上传组件样式 */
+.file-upload {
+    width: 100%;
+}
+
+.upload-dragger {
+    border: 2px dashed #d9d9d9 !important;
+    border-radius: 8px !important;
+    background: #fafafa !important;
+    transition: all 0.3s ease;
+}
+
+.upload-dragger:hover {
+    border-color: #1890ff !important;
+    background: #f6ffed !important;
+}
+
+.upload-dragger.ant-upload-disabled {
+    border-color: #d9d9d9 !important;
+    background: #f5f5f5 !important;
+    cursor: not-allowed;
+}
+
+.upload-dragger .ant-upload-drag-icon {
+    margin-bottom: 16px;
+}
+
+.upload-dragger .ant-upload-drag-icon .anticon {
+    font-size: 48px;
+    color: #1890ff;
+}
+
+.upload-dragger .ant-upload-text {
+    font-size: 16px;
+    font-weight: 500;
+    color: #262626;
+    margin-bottom: 8px;
+}
+
+.upload-dragger .ant-upload-hint {
+    font-size: 12px;
+    color: #8c8c8c;
+    line-height: 1.4;
+}
+
+/* 进度条样式 */
+.ant-progress-line {
+    margin-bottom: 8px;
+}
+
+.ant-progress-text {
+    font-size: 12px !important;
+}
+
+/* 文件列表样式 */
+.file-list {
+    width: 100%;
+}
+
+.file-list .ant-table {
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.file-list .ant-table-thead>tr>th {
+    background: #fafafa;
+    border-bottom: 1px solid #f0f0f0;
+    font-weight: 600;
+    color: #262626;
+}
+
+.file-list .ant-table-tbody>tr:hover>td {
+    background: #f5f5f5;
+}
+
+.file-list .ant-table-tbody>tr>td {
+    border-bottom: 1px solid #f0f0f0;
+    padding: 12px 16px;
+}
+
+/* 状态标签样式 */
+.ant-tag {
+    border-radius: 4px;
+    font-weight: 500;
+    font-size: 12px;
+    padding: 2px 8px;
+}
+
+/* 状态监控面板样式 */
+.ant-card-small .ant-card-head {
+    padding: 0 12px;
+    min-height: 40px;
+}
+
+.ant-card-small .ant-card-body {
+    padding: 12px;
+}
+
+.ant-card-small .ant-card-head-title {
+    font-size: 14px;
+    font-weight: 600;
+}
+
+/* 统计数字样式 */
+.ant-statistic {
+    text-align: center;
+}
+
+.ant-statistic-title {
+    font-size: 12px !important;
+    color: #8c8c8c !important;
+    margin-bottom: 4px !important;
+}
+
+.ant-statistic-content {
+    font-size: 20px !important;
+    font-weight: 600 !important;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+    .app-content {
+        padding: 16px;
+    }
+
+    .header-content {
+        padding: 0 16px;
+    }
+
+    .logo-text {
+        font-size: 20px !important;
+    }
+
+    .logo-icon {
+        font-size: 28px;
+    }
+
+    .stats-row {
+        margin-bottom: 16px;
+    }
+
+    .content-container {
+        margin: 0;
+    }
+}
+
+@media (max-width: 576px) {
+    .app-content {
+        padding: 12px;
+    }
+
+    .upload-dragger .ant-upload-drag-icon .anticon {
+        font-size: 36px;
+    }
+
+    .upload-dragger .ant-upload-text {
+        font-size: 14px;
+    }
+
+    .upload-dragger .ant-upload-hint {
+        font-size: 11px;
+    }
+
+    .ant-statistic-content {
+        font-size: 18px !important;
+    }
+}
+
+/* 加载状态样式 */
+.ant-spin-nested-loading {
+    border-radius: 8px;
+}
+
+.ant-spin-container {
+    transition: all 0.3s ease;
+}
+
+/* 模态框样式 */
+.ant-modal-header {
+    border-bottom: 1px solid #f0f0f0;
+    border-radius: 8px 8px 0 0;
+}
+
+.ant-modal-content {
+    border-radius: 8px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+}
+
+/* 按钮样式优化 */
+.ant-btn {
+    border-radius: 6px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.ant-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* 警告框样式 */
+.ant-alert {
+    border-radius: 6px;
+    margin-bottom: 8px;
+}
+
+.ant-alert-message {
+    font-weight: 500;
+}
+
+/* 代码块样式 */
+.ant-typography pre {
+    background: #f6f8fa !important;
+    border: 1px solid #e1e4e8 !important;
+    border-radius: 6px !important;
+    color: #24292e !important;
+    font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace !important;
+}
+
+/* 工具提示样式 */
+.ant-tooltip {
+    font-size: 12px;
+}
+
+/* 分页器样式 */
+.ant-pagination {
+    text-align: center;
+    margin-top: 16px;
+}
+
+.ant-pagination-options {
+    margin-left: 16px;
+}
+
+/* 空状态样式 */
+.ant-empty {
+    margin: 40px 0;
+}
+
+.ant-empty-description {
+    color: #8c8c8c;
+    font-size: 14px;
+}
+
+/* 动画效果 */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.fade-in-up {
+    animation: fadeInUp 0.5s ease-out;
+}
+
+/* 自定义滚动条 */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #a8a8a8;
+}
+
+/* 打印样式 */
+@media print {
+
+    .app-header,
+    .ant-btn,
+    .ant-pagination {
+        display: none !important;
+    }
+
+    .app-layout {
+        background: white !important;
+    }
+
+    .ant-card {
+        box-shadow: none !important;
+        border: 1px solid #d9d9d9 !important;
+    }
+}
