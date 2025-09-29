@@ -120,6 +120,13 @@ const apiService = {
             result,
             error
         });
+    },
+
+    // 获取解析后的文件URL
+    getParsedUrl: async (fileId, suffix) => {
+        return api.get(`/files/${fileId}/parsed-url`, {
+            params: { suffix }
+        });
     }
 };
 

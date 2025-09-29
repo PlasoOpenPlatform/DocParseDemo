@@ -30,7 +30,8 @@ class StorageService {
             uploadTime: new Date().toISOString(),
             status: 'uploaded', // uploaded, parsing, completed, failed
             taskId: null,
-            parseResult: null,
+            targetPath: null,
+            convertPages: null,
             errorMessage: null
         };
 
@@ -112,7 +113,8 @@ class StorageService {
                 file.updateTime = new Date().toISOString();
 
                 if (status === 'completed' && result) {
-                    file.parseResult = result;
+                    file.targetPath = result.targetPath;
+                    file.convertPages = result.convertPages;
                 } else if (status === 'failed' && result) {
                     file.errorMessage = result.error || '解析失败';
                 }

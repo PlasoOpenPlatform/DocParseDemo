@@ -13,6 +13,8 @@
 - **字符编码**: UTF-8
 - **认证方式**: AppId + SecretKey
 
+
+
 ## API接口
 
 ### 1. 创建文档解析任务
@@ -25,7 +27,8 @@
 | 参数名 | 类型 | 必填 | 说明 |
 |--------|------|------|------|
 | appId | string | 是 | 应用ID，用于标识调用方及其配置 |
-| sourcePath | string | 是 | 源文件的存储路径（OSS路径格式：oss://bucket/key） |
+| sourcePath | string | 是 | 源文件的存储路径（OSS路径格式：oss://bucket/file） |
+| targetPath | string | 否 | 解析后的存储路径（OSS路径格式：oss://bucket/dir）, 不传默认为 ${sourcePath}_i |
 | taskType | number | 是 | 任务类型，详见任务类型说明 |
 | callbackUrl | string | 是 | 任务处理完成后用于通知结果的回调URL |
 | validBegin | number | 是 | 请求开始时间戳（秒） |
@@ -35,9 +38,9 @@
 **任务类型 (taskType)**:
 | 类型 | 值 | 说明 |
 |------|----|----|
-| EXTERNAL_PPT | 4 | 外部PPT文档 |
-| EXTERNAL_DOC | 5 | 外部Word/Excel文档 |
-| EXTERNAL_PDF | 8 | 外部PDF文档 |
+| EXTERNAL_PPT | 4 | PPT文档 |
+| EXTERNAL_DOC | 5 | Word/Excel文档 |
+| EXTERNAL_PDF | 8 | PDF文档 |
 
 
 **请求示例**:
@@ -54,10 +57,9 @@
 ```
 
 **解析后文件保存路径**:
-- 系统会在源文件路径后添加`_i`后缀作为输出目录
-- 输出路径格式：`{sourcePath}_i/`
-- 例如：源文件`oss://bucket/path/document.pptx`，输出目录为`oss://bucket/path/document.pptx_i/`
-- sdk播放时，直接传入解析后的目录
+- 解析完成后，回调信息中的 `targetPath` 字段会返回解析后文件所在的目录路径 (OSS Key)。
+- 例如：`u001/20240910/xxxx/`
+- 具体的解析产物（如图片）需要将此 `targetPath` 与文件名（如 `1.jpg`）拼接后获取。
 
 **签名生成规则**:
 1. 将所有参数（除signature外）按参数名升序排列
@@ -117,11 +119,11 @@ curl -X POST \
 
 **请求参数**:
 | 参数名 | 类型 | 必填 | 说明 |
-|--------|------|------|------|
+|---|---|---|---|
 | taskId | string | 是 | 任务ID |
-| status | number/string | 是 | 任务状态 |
-| result | object | 否 | 解析结果（成功时） |
-| error | string | 否 | 错误信息（失败时） |
+| taskStatus | number | 是 | 任务状态，详见状态值说明 |
+| targetPath | string | 否 | 解析成功时返回，表示解析后文件所在的目录路径 (OSS Key) |
+| convertPages | number | 否 | 解析成功时返回，表示成功转换的页数 |
 
 **状态值说明**:
 | 状态值 | 状态名称 | 说明 |
@@ -150,11 +152,54 @@ curl -X POST \
 | 错误码 | 错误类型 | 说明 |
 |--------|----------|------|
 | 0 | SUCCESS | 成功 |
-| 1001 | INPUT_DATA_ERROR | 输入数据错误 |
-| 1002 | INADEQUATE_PRIVILEGE | 权限不足 |
-| 2001 | NOT_SUPPORT | 不支持的文件解析 |
-| 2002 | TASK_HAS_FULL | 任务队列已满 |
+| 4 | INPUT_DATA_ERROR | 输入数据错误（例如，`sourcePath` 未提供） |
+| 7 | INADEQUATE_PRIVILEGE | 权限不足（例如，机构未开通服务或OSS配置不存在） |
+| 270000 | NOT_SUPPORT | 不支持的文件解析 |
+| 270001 | TASK_HAS_FULL | 任务队列已满 |
 
+
+## 使用流程
+
+以下流程图和说明描述了如何完整地集成和使用文档解析服务，并展示了本Demo中的后端实现逻辑。
+
+```mermaid
+graph TD
+    A[用户: 上传文件] --> B(Demo前端);
+    B --> C{Demo后端: /api/files/upload};
+    C --> D[1. 上传文件至OSS];
+    D --> E[2. 调用文档解析服务 /parser API];
+    E --> F{外部解析服务};
+    F --> G[异步处理...];
+    G --> H{Demo后端: /api/callback/document};
+    H --> I[3. 保存targetPath和convertPages];
+    
+    J[用户: 点击获取解析文件] --> K(Demo前端);
+    K --> L{Demo后端: /api/files/:fileId/parsed-url};
+    L --> M[4. 获取targetPath并拼接suffix];
+    M --> N[5. 生成OSS签名URL];
+    N --> O[返回临时访问URL];
+    O --> K;
+```
+
+### Demo后端实现要点
+
+1.  **文件上传和任务创建** (`/api/files/upload`)
+    -   接收前端上传的文件。
+    -   将文件上传到您自己的阿里云OSS Bucket中，得到文件`ossKey`。
+    -   调用文档解析服务的 `POST /parser` 接口，请求中传入上一步得到的`sourcePath` (`oss://<your-bucket>/<ossKey>`) 和用于接收结果的`callbackUrl`。
+    -   在本地保存文件信息和返回的`taskId`。
+
+2.  **回调处理** (`/api/callback/document`)
+    -   创建一个公网可访问的接口，用于接收文档解析服务的异步回调。
+    -   回调请求的Body中会包含任务`id`、任务状态`taskStatus`、解析产物路径`targetPath`和转换页数`convertPages`。
+    -   根据`id`找到对应的文件记录，并将`targetPath`和`convertPages`等信息保存下来，同时将文件状态更新为`completed`或`failed`。
+
+3.  **获取解析文件** (`/api/files/:fileId/parsed-url`)
+    -   为前端提供一个接口，用于获取最终解析产物（如图片）的访问地址。
+    -   此接口接收`fileId`和具体的文件名`suffix`（例如 `1.jpg`）作为参数。
+    -   从存储中查询到之前保存的`targetPath`，并将其与`suffix`拼接成完整的OSS Object Key。
+    -   **注意**：`targetPath`可能包含`oss://<bucket>/`前缀，在调用签名方法前需要将其移除。
+    -   使用`ali-oss`的`signatureUrl`方法为拼接好的Object Key生成一个带签名的、有时间限制的公开访问URL，并返回给前端。
 
 ## 使用示例
 

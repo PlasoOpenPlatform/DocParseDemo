@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Table, Tag, Button, Space, Tooltip, Modal, Typography, Progress, message, Popconfirm, Badge } from 'antd';
-import { ReloadOutlined, DeleteOutlined, EyeOutlined, InfoCircleOutlined } from '@ant-design/icons';
+import { ReloadOutlined, DeleteOutlined, EyeOutlined, InfoCircleOutlined, LinkOutlined } from '@ant-design/icons';
 import moment from 'moment';
 import apiService from '../services/apiService';
 
@@ -94,6 +94,25 @@ const FileList = ({ refreshTrigger, onRefresh }) => {
         onRefresh && onRefresh();
     };
 
+    // 获取解析文件URL
+    const handleGetParsedUrl = async (fileId) => {
+        const suffix = prompt('请输入要获取的文件后缀 (例如: 1.jpg)', '1.jpg');
+        if (!suffix) return;
+
+        try {
+            const response = await apiService.getParsedUrl(fileId, suffix);
+            if (response.success) {
+                message.success('获取URL成功');
+                window.open(response.url, '_blank');
+            } else {
+                message.error(response.error || '获取URL失败');
+            }
+        } catch (error) {
+            console.error('获取解析文件URL失败:', error);
+            message.error(`获取URL失败: ${error.message}`);
+        }
+    };
+
     // 表格列定义
     const columns = [
         {
@@ -164,6 +183,13 @@ const FileList = ({ refreshTrigger, onRefresh }) => {
             ) : '-'
         },
         {
+            title: '转换页数',
+            dataIndex: 'convertPages',
+            key: 'convertPages',
+            width: 90,
+            render: (pages) => pages || '-'
+        },
+        {
             title: '操作',
             key: 'actions',
             width: 120,
@@ -177,6 +203,16 @@ const FileList = ({ refreshTrigger, onRefresh }) => {
                             onClick={() => handleViewDetail(record)}
                         />
                     </Tooltip>
+                    {record.status === 'completed' && (
+                        <Tooltip title="获取解析文件URL">
+                            <Button
+                                type="text"
+                                icon={<LinkOutlined />}
+                                size="small"
+                                onClick={() => handleGetParsedUrl(record.id)}
+                            />
+                        </Tooltip>
+                    )}
                     <Popconfirm
                         title="确定要删除这个文件吗？"
                         onConfirm={() => handleDeleteFile(record.id)}
@@ -333,6 +369,22 @@ const FileList = ({ refreshTrigger, onRefresh }) => {
                                             {JSON.stringify(selectedFile.parseResult, null, 2)}
                                         </pre>
                                     </Paragraph>
+                                </div>
+                            )}
+
+                            {selectedFile.targetPath && (
+                                <div>
+                                    <Text strong>解析后路径 (targetPath):</Text>
+                                    <br />
+                                    <Text code>{selectedFile.targetPath}</Text>
+                                </div>
+                            )}
+
+                            {selectedFile.convertPages && (
+                                <div>
+                                    <Text strong>转换页数 (convertPages):</Text>
+                                    <br />
+                                    <Text>{selectedFile.convertPages}</Text>
                                 </div>
                             )}
 

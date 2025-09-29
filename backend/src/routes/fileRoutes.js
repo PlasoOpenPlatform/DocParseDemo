@@ -268,5 +268,75 @@ router.delete('/:fileId', async (req, res) => {
     }
 });
 
+/**
+ * 获取解析后的文件签名url
+ * GET /api/files/:fileId/parsed-url?suffix=<suffix>
+ */
+router.get('/:fileId/parsed-url', async (req, res) => {
+    try {
+        const { fileId } = req.params;
+        const { suffix } = req.query;
+
+        if (!suffix) {
+            return res.status(400).json({
+                success: false,
+                error: '缺少suffix参数'
+            });
+        }
+
+        const file = storageService.getFile(fileId);
+
+        if (!file) {
+            return res.status(404).json({
+                success: false,
+                error: '文件不存在'
+            });
+        }
+
+        if (file.status !== 'completed') {
+            return res.status(400).json({
+                success: false,
+                error: '文件尚未解析成功'
+            });
+        }
+
+        const parsedBasePath = file.targetPath;
+
+        if (!parsedBasePath) {
+            return res.status(404).json({
+                success: false,
+                error: '解析结果中未找到targetPath信息'
+            });
+        }
+
+        // 根据用户反馈，移除 targetPath 中的 oss://<bucket>/ 前缀
+        let basePathKey = parsedBasePath;
+        const prefix = `oss://${config.oss.bucket}/`;
+        if (basePathKey.startsWith(prefix)) {
+            basePathKey = basePathKey.substring(prefix.length);
+        }
+
+        // 确保路径正确拼接
+        const separator = basePathKey.endsWith('/') ? '' : '/';
+        const parsedOssKey = `${basePathKey}${separator}${suffix}`;
+
+        // 获取签名URL
+        const signedUrl = ossService.getSignedUrl(parsedOssKey);
+
+        res.json({
+            success: true,
+            url: signedUrl
+        });
+
+    } catch (error) {
+        console.error('获取解析后文件URL失败:', error);
+        res.status(500).json({
+            success: false,
+            error: '获取解析后文件URL失败',
+            message: error.message
+        });
+    }
+});
+
 module.exports = router;
 

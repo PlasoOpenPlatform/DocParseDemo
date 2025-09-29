@@ -45,9 +45,6 @@ class DocParseService {
             return config.taskTypes.EXTERNAL_DOC;
         } else if (config.supportedFileTypes.PDF.includes(ext)) {
             return config.taskTypes.EXTERNAL_PDF;
-        } else if (ext === '.pptx') {
-            // Microsoft格式的PPT
-            return config.taskTypes.EXTERNAL_PPT_MICROSOFT;
         }
 
         throw new Error(`不支持的文件类型: ${ext}`);

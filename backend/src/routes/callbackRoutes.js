@@ -13,10 +13,11 @@ router.post('/document', (req, res) => {
         console.log('收到文档解析回调:', req.body);
 
         const body = req.body || {};
-        const taskId = body.taskId || body.id || body.task_id || body.taskID;
-        const rawStatus = body.status !== undefined ? body.status : (body.taskStatus !== undefined ? body.taskStatus : body.state);
-        const result = body.result || body.data || null;
+        const taskId = body.taskId
+        const rawStatus = body.taskStatus
         const error = body.error || body.msg || body.message || null;
+        const targetPath = body.targetPath || null;
+        const convertPages = body.convertPages || null;
 
         if (!taskId) {
             return res.status(400).json({
@@ -71,7 +72,7 @@ router.post('/document', (req, res) => {
 
         switch (localStatus) {
             case 'completed':
-                storageService.updateTaskStatus(taskId, 'completed', result || { rawCallback: body });
+                storageService.updateTaskStatus(taskId, 'completed', { targetPath, convertPages });
                 break;
             case 'failed':
                 storageService.updateTaskStatus(taskId, 'failed', { error: error || '文档解析失败', rawCallback: body });

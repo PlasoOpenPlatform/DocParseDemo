@@ -109,6 +109,7 @@ demo/
   - `GET /list` - 文件列表
   - `GET /:fileId` - 文件详情
   - `DELETE /:fileId` - 删除文件
+  - `GET /:fileId/parsed-url` - 获取解析文件URL
   - `GET /stats` - 统计信息
 
 **callbackRoutes.js**
@@ -148,7 +149,7 @@ demo/
 **storageService.js**
 - **作用**: 内存存储管理服务
 - **功能**:
-  - 文件记录管理
+  - 文件记录管理（包括 `targetPath` 和 `convertPages`）
   - 任务状态跟踪
   - 数据统计
   - 过期数据清理
@@ -204,9 +205,10 @@ demo/
 **FileList.js**
 - **作用**: 文件列表组件
 - **功能**:
-  - 文件列表展示
+  - 文件列表展示（包括 `convertPages` 等字段）
   - 分页和过滤
   - 文件详情查看
+  - 获取解析文件URL
   - 文件删除操作
   - 状态实时更新
 

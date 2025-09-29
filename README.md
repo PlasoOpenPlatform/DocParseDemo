@@ -167,10 +167,15 @@ npm start
 
 - 文件基本信息（名称、大小、时间等）
 - 任务ID和状态
-- 解析结果（如果已完成）
+- 解析后路径 (`targetPath`)
+- 转换页数 (`convertPages`)
 - 错误信息（如果失败）
 
-#### 6. 删除文件
+#### 6. 获取解析文件
+
+对于状态为“已完成”的文件，可以点击"🔗"图标来获取具体解析产物（如图片）的访问链接。点击后，系统会提示您输入文件名（例如 `1.jpg`），确认后即可在新标签页中打开文件的临时访问URL。
+
+#### 7. 删除文件
 
 点击文件列表中的"🗑️"图标可以删除文件，这将：
 
@@ -227,6 +232,11 @@ DELETE /api/files/{fileId}
 GET /api/files/stats
 ```
 
+**获取解析文件URL**
+```
+GET /api/files/{fileId}/parsed-url?suffix={fileName}
+```
+
 #### 状态查询接口
 
 **获取任务状态**
@@ -264,10 +274,10 @@ GET /api/status/health
 ```
 POST /api/callback/document
 Body: {
-  "taskId": "string",
-  "status": "SUCCESS|FAILED|PROCESSING",
-  "result": {},
-  "error": "string"
+  "id": "string",
+  "taskStatus": 100,
+  "targetPath": "u001/xxxx/",
+  "convertPages": 10
 }
 ```
 
