@@ -7,6 +7,7 @@ const config = require('../config');
 class OSSService {
     constructor() {
         this.client = new OSS({
+            secure: true,
             region: config.oss.region,
             accessKeyId: config.oss.accessKeyId,
             accessKeySecret: config.oss.accessKeySecret,
