@@ -28,7 +28,6 @@
 |--------|------|------|------|
 | appId | string | 是 | 应用ID，用于标识调用方及其配置 |
 | sourcePath | string | 是 | 源文件的存储路径（OSS路径格式：oss://bucket/file） |
-| targetPath | string | 否 | 解析后的存储路径（OSS路径格式：oss://bucket/dir）, 不传默认为 ${sourcePath}_i |
 | taskType | number | 是 | 任务类型，详见任务类型说明 |
 | callbackUrl | string | 是 | 任务处理完成后用于通知结果的回调URL |
 | validBegin | number | 是 | 请求开始时间戳（秒） |
@@ -57,8 +56,9 @@
 ```
 
 **解析后文件保存路径**:
-- 解析完成后，回调信息中的 `targetPath` 字段会返回解析后文件所在的目录路径 (OSS Key)。
-- 例如：`u001/20240910/xxxx/`
+- 解析完成后，文件将保存在源文件路径后附加 `_i` 的目录中，即 `${sourcePath}_i/`。
+- 回调信息中的 `targetPath` 字段会返回此目录路径 (OSS Key)。
+- 例如，如果 `sourcePath` 是 `oss://bucket/docs/file.pptx`，则 `targetPath` 将是 `docs/file.pptx_i/`。
 - 具体的解析产物（如图片）需要将此 `targetPath` 与文件名（如 `1.jpg`）拼接后获取。
 
 **签名生成规则**:
@@ -122,7 +122,6 @@ curl -X POST \
 |---|---|---|---|
 | taskId | string | 是 | 任务ID |
 | taskStatus | number | 是 | 任务状态，详见状态值说明 |
-| targetPath | string | 否 | 解析成功时返回，表示解析后文件所在的目录路径 (OSS Key) |
 | convertPages | number | 否 | 解析成功时返回，表示成功转换的页数 |
 
 **状态值说明**:
@@ -171,11 +170,11 @@ graph TD
     E --> F{外部解析服务};
     F --> G[异步处理...];
     G --> H{Demo后端: /api/callback/document};
-    H --> I[3. 保存targetPath和convertPages];
+    H --> I[3. 保存任务状态和页数];
     
     J[用户: 点击获取解析文件] --> K(Demo前端);
     K --> L{Demo后端: /api/files/:fileId/parsed-url};
-    L --> M[4. 获取targetPath并拼接suffix];
+    L --> M[4. 根据sourcePath构造路径并拼接suffix];
     M --> N[5. 生成OSS签名URL];
     N --> O[返回临时访问URL];
     O --> K;
@@ -187,19 +186,20 @@ graph TD
     -   接收前端上传的文件。
     -   将文件上传到您自己的阿里云OSS Bucket中，得到文件`ossKey`。
     -   调用文档解析服务的 `POST /parser` 接口，请求中传入上一步得到的`sourcePath` (`oss://<your-bucket>/<ossKey>`) 和用于接收结果的`callbackUrl`。
-    -   在本地保存文件信息和返回的`taskId`。
+    -   在本地保存文件信息（包含`sourcePath`）和返回的`taskId`。
 
 2.  **回调处理** (`/api/callback/document`)
     -   创建一个公网可访问的接口，用于接收文档解析服务的异步回调。
-    -   回调请求的Body中会包含任务`id`、任务状态`taskStatus`、解析产物路径`targetPath`和转换页数`convertPages`。
-    -   根据`id`找到对应的文件记录，并将`targetPath`和`convertPages`等信息保存下来，同时将文件状态更新为`completed`或`failed`。
+    -   回调请求的Body中会包含任务`id`、任务状态`taskStatus`和转换页数`convertPages`。
+    -   根据`id`找到对应的文件记录，将`convertPages`等信息保存下来，同时将文件状态更新为`completed`或`failed`。
 
 3.  **获取解析文件** (`/api/files/:fileId/parsed-url`)
     -   为前端提供一个接口，用于获取最终解析产物（如图片）的访问地址。
     -   此接口接收`fileId`和具体的文件名`suffix`（例如 `1.jpg`）作为参数。
-    -   从存储中查询到之前保存的`targetPath`，并将其与`suffix`拼接成完整的OSS Object Key。
-    -   **注意**：`targetPath`可能包含`oss://<bucket>/`前缀，在调用签名方法前需要将其移除。
-    -   使用`ali-oss`的`signatureUrl`方法为拼接好的Object Key生成一个带签名的、有时间限制的公开访问URL，并返回给前端。
+    -   根据 `fileId` 从存储中查询到原始的 `sourcePath`。
+    -   从 `sourcePath` (`oss://<bucket>/<ossKey>`) 中提取 `ossKey`。
+    -   构造解析产物的完整 Object Key：`<ossKey>_i/<suffix>`。
+    -   使用`ali-oss`的`signatureUrl`方法为该 Object Key 生成一个带签名的、有时间限制的公开访问URL，并返回给前端。
 
 ## 使用示例
 
@@ -311,4 +311,3 @@ async function main() {
 
 main();
 ```
-

@@ -43,7 +43,9 @@ class DocParseService {
             return config.taskTypes.EXTERNAL_PPT;
         } else if (config.supportedFileTypes.DOC.includes(ext)) {
             return config.taskTypes.EXTERNAL_DOC;
-        } else if (config.supportedFileTypes.PDF.includes(ext)) {
+        } else if (config.supportedFileTypes.EXCEL.includes(ext)) {
+            return config.taskTypes.EXTERNAL_DOC;
+        }  else if (config.supportedFileTypes.PDF.includes(ext)) {
             return config.taskTypes.EXTERNAL_PDF;
         }
 

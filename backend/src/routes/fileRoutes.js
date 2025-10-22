@@ -20,7 +20,8 @@ const upload = multer({
         const supportedTypes = [
             ...config.supportedFileTypes.PPT,
             ...config.supportedFileTypes.DOC,
-            ...config.supportedFileTypes.PDF
+            ...config.supportedFileTypes.PDF,
+            ...config.supportedFileTypes.EXCEL
         ];
 
         if (supportedTypes.includes(ext)) {
@@ -271,6 +272,7 @@ router.delete('/:fileId', async (req, res) => {
 /**
  * 获取解析后的文件签名url
  * GET /api/files/:fileId/parsed-url?suffix=<suffix>
+ * suffix = 1.jpg?image/resize,w_100  (注意urlencode)
  */
 router.get('/:fileId/parsed-url', async (req, res) => {
     try {
@@ -300,7 +302,7 @@ router.get('/:fileId/parsed-url', async (req, res) => {
             });
         }
 
-        const parsedBasePath = file.targetPath;
+        const parsedBasePath = file.ossKey;
 
         if (!parsedBasePath) {
             return res.status(404).json({
@@ -316,12 +318,16 @@ router.get('/:fileId/parsed-url', async (req, res) => {
             basePathKey = basePathKey.substring(prefix.length);
         }
 
-        // 确保路径正确拼接
-        const separator = basePathKey.endsWith('/') ? '' : '/';
-        const parsedOssKey = `${basePathKey}${separator}${suffix}`;
+        const [keySuffix, process] = suffix.split('?');
+        const parsedOssKey = `${basePathKey}${keySuffix}`;
+
+        const options = {};
+        if (process) {
+            options.process = process;
+        }
 
         // 获取签名URL
-        const signedUrl = ossService.getSignedUrl(parsedOssKey);
+        const signedUrl = ossService.getSignedUrl(parsedOssKey, options);
 
         res.json({
             success: true,

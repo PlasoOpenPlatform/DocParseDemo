@@ -12,7 +12,7 @@ const FileUpload = ({ onSuccess, onError }) => {
     const [uploadResult, setUploadResult] = useState(null);
 
     // 支持的文件类型
-    const supportedTypes = ['.ppt', '.pptx', '.doc', '.docx', '.pdf'];
+    const supportedTypes = ['.ppt', '.pptx', '.doc', '.docx', '.pdf', '.xls', '.xlsx'];
     const maxSize = 100 * 1024 * 1024; // 100MB
 
     // 文件上传前的检查
@@ -20,7 +20,7 @@ const FileUpload = ({ onSuccess, onError }) => {
         const fileExtension = '.' + file.name.split('.').pop().toLowerCase();
 
         if (!supportedTypes.includes(fileExtension)) {
-            const message = `不支持的文件类型。支持的类型: ${supportedTypes.join(', ')}`;
+            const message = `不支持的文件类型: ${fileExtension}。支持的类型: ${supportedTypes.join(', ')}`;
             onError && onError({ message });
             return Upload.LIST_IGNORE;
         }

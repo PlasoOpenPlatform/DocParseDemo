@@ -81,12 +81,16 @@ class OSSService {
     /**
      * 获取文件访问URL
      * @param {string} ossKey OSS文件键
-     * @param {number} expires 过期时间(秒)，默认1小时
+     * @param {object} options 签名URL选项
      * @returns {string} 签名URL
      */
-    getSignedUrl(ossKey, expires = 3600) {
+    getSignedUrl(ossKey, options = {}) {
         try {
-            return this.client.signatureUrl(ossKey, { expires });
+            const defaultOptions = {
+                expires: 3600
+            };
+            const finalOptions = { ...defaultOptions, ...options };
+            return this.client.signatureUrl(ossKey, finalOptions);
         } catch (error) {
             console.error('生成签名URL失败:', error);
             throw new Error(`生成访问链接失败: ${error.message}`);

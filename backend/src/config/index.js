@@ -28,7 +28,8 @@ const config = {
         // DOC文档类型  
         DOC: ['.doc', '.docx'],
         // PDF文档类型
-        PDF: ['.pdf']
+        PDF: ['.pdf'],
+        EXCEL: ['.xls', '.xlsx']
     },
 
     // 任务类型映射 (对应dataentry服务中的TASK_TYPE)
