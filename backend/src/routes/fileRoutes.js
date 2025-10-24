@@ -272,7 +272,7 @@ router.delete('/:fileId', async (req, res) => {
 /**
  * 获取解析后的文件签名url
  * GET /api/files/:fileId/parsed-url?suffix=<suffix>
- * suffix = 1.jpg?image/resize,w_100  (注意urlencode)
+ * suffix = 1.jpg?x-oss-process=image/resize,l_200  (注意urlencode)
  */
 router.get('/:fileId/parsed-url', async (req, res) => {
     try {
@@ -318,14 +318,19 @@ router.get('/:fileId/parsed-url', async (req, res) => {
             basePathKey = basePathKey.substring(prefix.length);
         }
 
-        const [keySuffix, process] = suffix.split('?');
-        const parsedOssKey = `${basePathKey}${keySuffix}`;
+        // 为了让 URL 解析器正常工作，我们需要一个完整的 URL，
+        // 所以我们提供一个虚拟的基础 URL。
+        const fullUrl = new URL(suffix, 'http://example.com');
 
+        // 从 URL 对象中获取查询参数
+        const ossProcess = fullUrl.searchParams.get('x-oss-process');
         const options = {};
-        if (process) {
-            options.process = process;
+        if (ossProcess) {
+            options.process = ossProcess;
         }
 
+        const keySuffix = fullUrl.pathname.substring(1);
+        const parsedOssKey = `${basePathKey}${keySuffix}`;
         // 获取签名URL
         const signedUrl = ossService.getSignedUrl(parsedOssKey, options);
 
