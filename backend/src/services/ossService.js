@@ -1,4 +1,5 @@
 const OSS = require('ali-oss');
+const STS = require('ali-oss').STS;
 const path = require('path');
 const fs = require('fs');
 const { v4: uuidv4 } = require('uuid');
@@ -13,6 +14,44 @@ class OSSService {
             accessKeySecret: config.oss.accessKeySecret,
             bucket: config.oss.bucket
         });
+        console.log(config.oss);
+        if (config.oss.stsEndpoint && config.oss.roleArn) {
+            this.sts = new STS({
+                accessKeyId: config.oss.accessKeyId,
+                accessKeySecret: config.oss.accessKeySecret,
+                endpoint: config.oss.stsEndpoint,
+            });
+        }
+    }
+
+    async getSTSInfo(dir) {
+        if (!this.sts) {
+            throw new Error('STS is not configured');
+        }
+        const policy = {
+            Version: '1',
+            Statement: [
+                {
+                    Effect: 'Allow',
+                    Action: ['oss:GetObject'],
+                    Resource: `acs:oss:*:*:${dir}*`,
+                },
+            ],
+        };
+        try {
+            const token = await this.sts.assumeRole(config.oss.roleArn, policy, 3600);
+            return {
+                region: config.oss.region,
+                bucket: config.oss.bucket,
+                accessKeyId: token.credentials.AccessKeyId,
+                accessKeySecret: token.credentials.AccessKeySecret,
+                securityToken: token.credentials.SecurityToken,
+                expiration: token.credentials.Expiration,
+            };
+        } catch (e) {
+            console.error('Failed to assume role:', e);
+            throw new Error('Failed to get STS credentials');
+        }
     }
 
     /**

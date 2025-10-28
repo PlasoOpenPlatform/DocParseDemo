@@ -45,7 +45,7 @@ class DocParseService {
             return config.taskTypes.EXTERNAL_DOC;
         } else if (config.supportedFileTypes.EXCEL.includes(ext)) {
             return config.taskTypes.EXTERNAL_DOC;
-        }  else if (config.supportedFileTypes.PDF.includes(ext)) {
+        } else if (config.supportedFileTypes.PDF.includes(ext)) {
             return config.taskTypes.EXTERNAL_PDF;
         }
 
@@ -75,6 +75,7 @@ class DocParseService {
                 appId: this.appId,
                 sourcePath: sourcePath,
                 taskType: taskType,
+                exportBoard: true,
                 callbackUrl: callbackUrl
             };
             params.signature = this.generateSignature(params, this.secretKey);

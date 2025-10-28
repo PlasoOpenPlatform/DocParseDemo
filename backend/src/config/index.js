@@ -6,6 +6,8 @@ const config = {
         accessKeyId: process.env.OSS_ACCESS_KEY_ID || 'your-access-key-id',
         accessKeySecret: process.env.OSS_ACCESS_KEY_SECRET || 'your-access-key-secret',
         bucket: process.env.OSS_BUCKET || 'your-bucket-name',
+        stsEndpoint: process.env.OSS_STS_ENDPOINT || 'https://sts-vpc.cn-hangzhou.aliyuncs.com',
+        roleArn: process.env.OSS_ROLE_ARN || '',
         // OSS文件存储路径前缀
         pathPrefix: 'dev-plaso/temp/docparse-demo/'
     },

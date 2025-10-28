@@ -349,5 +349,57 @@ router.get('/:fileId/parsed-url', async (req, res) => {
     }
 });
 
+/**
+ * 获取解析后文件信息，用于导出板书
+ * POST /api/files/parsedInfo
+ */
+router.post('/parsedInfo', async (req, res) => {
+    try {
+        const { signature, appId } = req.body;
+
+        if (!signature || !appId) {
+            return res.status(400).json({ success: false, error: 'Missing signature or appId' });
+        }
+
+        // In a real application, you might look up the secret key from a database based on the appId
+        const secretKey = config.docParseService.auth.secretKey;
+        const expectedSignature = docParseService.generateSignature(req.body, secretKey);
+
+        if (signature !== expectedSignature) {
+            return res.status(401).json({ success: false, error: 'Invalid signature' });
+        }
+
+        const { info } = req.body;
+        if (!info) {
+            return res.status(400).json({ success: false, error: 'Missing info' });
+        }
+
+        // info是透传，客户端插入的格式和这边一样。
+        const parsedInfo = JSON.parse(info);
+        console.log(parsedInfo)
+
+        const fileId = parsedInfo[1].id;
+
+        const file = storageService.getFile(fileId);
+        if (!file) {
+            return res.status(404).json({ success: false, error: 'File not found' });
+        }
+
+        const location = file.targetPath.replace('oss://', '');
+        const stsInfo = await ossService.getSTSInfo(location);
+
+        res.json({
+            code: 0,
+            obj: {
+                location,
+                stsInfo,
+            },
+        });
+    } catch (error) {
+        console.error('Failed to get parsed info:', error);
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
 module.exports = router;
 
