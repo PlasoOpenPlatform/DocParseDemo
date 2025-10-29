@@ -385,8 +385,9 @@ router.post('/parsedInfo', async (req, res) => {
             return res.status(404).json({ success: false, error: 'File not found' });
         }
 
-        const location = file.targetPath.replace('oss://', '');
-        const stsInfo = await ossService.getSTSInfo(location);
+        // 接口返回location是相对路径，需要删除bucket前缀
+        const location = file.targetPath.replace(`oss://${config.oss.bucket}/`, '');
+        const stsInfo = await ossService.getSTSInfo(file.targetPath.replace(`oss://`, ''));
 
         res.json({
             code: 0,

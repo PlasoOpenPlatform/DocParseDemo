@@ -24,6 +24,8 @@ class OSSService {
         }
     }
 
+    // dir 需要包含bucket前缀
+    // file-plaso/dev-plaso/temp/docparse-demo/039cc68a-3316-41b2-bae6-49a47bc1bd18.docx_i
     async getSTSInfo(dir) {
         if (!this.sts) {
             throw new Error('STS is not configured');
@@ -41,7 +43,8 @@ class OSSService {
         try {
             const token = await this.sts.assumeRole(config.oss.roleArn, policy, 3600);
             return {
-                region: config.oss.region,
+                // 标准region格式不需要oss-前缀
+                region: config.oss.region.replace('oss-', ''),
                 bucket: config.oss.bucket,
                 accessKeyId: token.credentials.AccessKeyId,
                 accessKeySecret: token.credentials.AccessKeySecret,
