@@ -5,8 +5,10 @@ const config = require('../config');
 class DocParseService {
     constructor() {
         this.baseUrl = `${config.docParseService.baseUrl}`;
-        this.appId = config.docParseService.auth.appId;
-        this.secretKey = config.docParseService.auth.secretKey;
+        // 使用第一个认证配置作为默认配置
+        const defaultAuth = config.docParseService.auth[0];
+        this.appId = defaultAuth.appId;
+        this.secretKey = defaultAuth.secretKey;
     }
 
     /**

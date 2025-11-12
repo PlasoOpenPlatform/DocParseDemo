@@ -16,13 +16,16 @@ const config = {
     docParseService: {
         baseUrl: process.env.DOC_PARSE_BASE_URL || 'http://localhost',
         port: process.env.DOC_PARSE_PORT || 80,
-        // 认证配置
-        auth: {
-            appId: process.env.APP_ID || 'demo-app-id',
-            secretKey: process.env.SECRET_KEY || 'demo-secret-key',
-            appId2: process.env.APP_ID_2 || 'demo-app-id-2',
-            secretKey2: process.env.SECRET_KEY_2 || 'demo-secret-key-2'
-        }
+        // 认证配置 - 支持多个appId
+        // 环境变量格式: APP_IDS=id1,id2,id3 SECRET_KEYS=key1,key2,key3
+        auth: (() => {
+            const appIds = process.env.APP_IDS.split(',');
+            const secretKeys = process.env.SECRET_KEYS.split(',');
+            return appIds.map((appId, index) => ({
+                appId: appId.trim(),
+                secretKey: secretKeys[index]?.trim()
+            })).filter(item => item.appId && item.secretKey);
+        })()
     },
 
     // 支持的文件类型

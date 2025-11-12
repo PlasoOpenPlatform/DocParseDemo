@@ -6,20 +6,13 @@ class SignatureService {
 
     /**
      * 根据appId获取对应的secretKey
-     * @param {string} appId 
+     * @param {string} appId
      * @returns {string|null} a secret key or null
      */
     getSecretKeyByAppId(appId) {
-        // 测试环境有多个appId，根据appId返回对应的secretKey
-        const authConfig = config.docParseService.auth;
-        if (authConfig.appId === appId) {
-            return authConfig.secretKey;
-        }
-        if (authConfig.appId2 === appId) {
-            return authConfig.secretKey2;
-        }
-        // 可以根据需要扩展更多appId
-        return null;
+        const authList = config.docParseService.auth;
+        const authItem = authList.find(item => item.appId === appId);
+        return authItem ? authItem.secretKey : null;
     }
 
     /**

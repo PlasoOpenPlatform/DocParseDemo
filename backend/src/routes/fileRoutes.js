@@ -7,6 +7,7 @@ const router = express.Router();
 const ossService = require('../services/ossService');
 const docParseService = require('../services/docParseService');
 const storageService = require('../services/storageService');
+const signatureService = require('../services/signatureService');
 const config = require('../config');
 
 // 配置multer用于文件上传
@@ -361,8 +362,12 @@ router.post('/parsedInfo', async (req, res) => {
             return res.status(400).json({ success: false, error: 'Missing signature or appId' });
         }
 
-        // In a real application, you might look up the secret key from a database based on the appId
-        const secretKey = config.docParseService.auth.secretKey;
+        // 根据appId获取对应的secretKey
+        const secretKey = signatureService.getSecretKeyByAppId(appId);
+        if (!secretKey) {
+            return res.status(401).json({ success: false, error: 'Invalid appId' });
+        }
+
         const expectedSignature = docParseService.generateSignature(req.body, secretKey);
 
         // 测试忽略签名校验
