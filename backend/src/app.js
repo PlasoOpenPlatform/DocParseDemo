@@ -11,6 +11,7 @@ const path = require('path');
 const fileRoutes = require('./routes/fileRoutes');
 const callbackRoutes = require('./routes/callbackRoutes');
 const statusRoutes = require('./routes/statusRoutes');
+const signatureRoutes = require('./routes/signatureRoutes');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -32,6 +33,7 @@ const upload = multer({
 app.use('/api/files', fileRoutes);
 app.use('/api/callback', callbackRoutes);
 app.use('/api/status', statusRoutes);
+app.use('/api/signature', signatureRoutes);
 
 // 健康检查
 app.get('/health', (req, res) => {

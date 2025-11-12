@@ -19,7 +19,9 @@ const config = {
         // 认证配置
         auth: {
             appId: process.env.APP_ID || 'demo-app-id',
-            secretKey: process.env.SECRET_KEY || 'demo-secret-key'
+            secretKey: process.env.SECRET_KEY || 'demo-secret-key',
+            appId2: process.env.APP_ID_2 || 'demo-app-id-2',
+            secretKey2: process.env.SECRET_KEY_2 || 'demo-secret-key-2'
         }
     },
 
